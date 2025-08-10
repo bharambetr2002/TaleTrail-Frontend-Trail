@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -29,23 +30,55 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/library" element={<MyLibrary />} />
             <Route path="/books" element={<BooksCatalog />} />
             <Route path="/books/:id" element={<BookDetail />} />
             <Route path="/blogs" element={<Blogs />} />
-            <Route path="/blogs/new" element={<BlogForm />} />
             <Route path="/blogs/:id" element={<BlogDetail />} />
-            <Route path="/blogs/:id/edit" element={<BlogForm />} />
             <Route path="/profile/:username" element={<UserProfile />} />
             <Route path="/authors" element={<Authors />} />
             <Route path="/authors/:id" element={<Authors />} />
             <Route path="/publishers" element={<Publishers />} />
             <Route path="/publishers/:id" element={<Publishers />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
+            {/* Protected Routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/library"
+              element={
+                <ProtectedRoute>
+                  <MyLibrary />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/blogs/new"
+              element={
+                <ProtectedRoute>
+                  <BlogForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/blogs/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <BlogForm />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Catch-all route - MUST be last */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -10,6 +10,7 @@ import { BookCard } from "@/components/books/BookCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { api, READING_STATUS } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface Book {
   id: string;
@@ -32,6 +33,7 @@ export default function BooksCatalog() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const { user, logout } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchBooks();
@@ -92,13 +94,14 @@ export default function BooksCatalog() {
     }
   };
 
+  // FIX: Add proper navigation function
+  const handleViewBook = (bookId: string) => {
+    navigate(`/books/${bookId}`);
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <Header
-        user={user}
-        onSearch={handleSearch}
-        onSignOut={logout}
-      />
+      <Header user={user} onSearch={handleSearch} onSignOut={logout} />
 
       <main className="container mx-auto px-4 py-8">
         {/* Page Header */}
@@ -123,7 +126,9 @@ export default function BooksCatalog() {
                     placeholder="Search for books, authors, publishers..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSearch(searchQuery)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && handleSearch(searchQuery)
+                    }
                     className="pl-10 bg-background/50"
                   />
                 </div>
@@ -162,8 +167,11 @@ export default function BooksCatalog() {
               </Badge>
             )}
           </div>
-          
-          <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as "grid" | "list")}>
+
+          <Tabs
+            value={viewMode}
+            onValueChange={(value) => setViewMode(value as "grid" | "list")}
+          >
             <TabsList>
               <TabsTrigger value="grid" className="gap-2">
                 <Grid className="h-4 w-4" />
@@ -182,19 +190,22 @@ export default function BooksCatalog() {
           <div className="flex items-center justify-center py-20">
             <div className="text-center space-y-4">
               <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-              <p className="text-muted-foreground">Loading amazing books for you...</p>
+              <p className="text-muted-foreground">
+                Loading amazing books for you...
+              </p>
             </div>
           </div>
         ) : books.length === 0 ? (
           <div className="text-center py-20">
             <div className="space-y-4">
               <Search className="h-12 w-12 mx-auto text-muted-foreground/50" />
-              <h3 className="text-xl font-semibold text-muted-foreground">No books found</h3>
+              <h3 className="text-xl font-semibold text-muted-foreground">
+                No books found
+              </h3>
               <p className="text-muted-foreground">
-                {searchQuery 
+                {searchQuery
                   ? `No results for "${searchQuery}". Try a different search term.`
-                  : "No books available at the moment."
-                }
+                  : "No books available at the moment."}
               </p>
               {searchQuery && (
                 <Button
@@ -218,19 +229,19 @@ export default function BooksCatalog() {
                     key={book.id}
                     book={book}
                     onAddToLibrary={handleAddToLibrary}
-                    onViewDetails={(bookId) => {
-                      // Navigate to book details
-                      console.log("View book details:", bookId);
-                    }}
+                    onView={handleViewBook}
                   />
                 ))}
               </div>
             </TabsContent>
-            
+
             <TabsContent value="list">
               <div className="space-y-4">
                 {books.map((book) => (
-                  <Card key={book.id} className="overflow-hidden hover:shadow-card transition-smooth">
+                  <Card
+                    key={book.id}
+                    className="overflow-hidden hover:shadow-card transition-smooth"
+                  >
                     <CardContent className="p-4">
                       <div className="flex gap-4">
                         <img
@@ -243,9 +254,14 @@ export default function BooksCatalog() {
                           }}
                         />
                         <div className="flex-1 space-y-2">
-                          <h3 className="font-semibold text-lg leading-tight">{book.title}</h3>
+                          <h3 className="font-semibold text-lg leading-tight">
+                            {book.title}
+                          </h3>
                           <p className="text-sm text-muted-foreground">
-                            by {book.authors.map(author => author.name).join(", ")}
+                            by{" "}
+                            {book.authors
+                              .map((author) => author.name)
+                              .join(", ")}
                           </p>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span>{book.publicationYear}</span>
@@ -262,14 +278,31 @@ export default function BooksCatalog() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleAddToLibrary(book.id, READING_STATUS.TO_READ)}
+                            onClick={() => handleViewBook(book.id)}
+                          >
+                            View Details
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleAddToLibrary(
+                                book.id,
+                                READING_STATUS.TO_READ
+                              )
+                            }
                           >
                             Want to Read
                           </Button>
                           <Button
-                            variant="accent"
+                            variant="default"
                             size="sm"
-                            onClick={() => handleAddToLibrary(book.id, READING_STATUS.IN_PROGRESS)}
+                            onClick={() =>
+                              handleAddToLibrary(
+                                book.id,
+                                READING_STATUS.IN_PROGRESS
+                              )
+                            }
                           >
                             Start Reading
                           </Button>

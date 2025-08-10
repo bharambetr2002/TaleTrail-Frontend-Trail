@@ -32,14 +32,23 @@ export default function Blogs() {
         setBlogs(allBlogsResponse.data);
       }
 
-      // Fetch user's blogs if authenticated
+      // FIX: Fetch user's blogs if authenticated - use correct API method
       if (isAuthenticated && user?.id) {
-        const userBlogsResponse = await api.getBlogsByUser(user.id);
-        if (userBlogsResponse?.success) {
-          setMyBlogs(userBlogsResponse.data);
+        try {
+          // Use the existing getBlogs method with userId parameter
+          const userBlogsResponse = await api.getBlogs(user.id);
+          if (
+            userBlogsResponse?.success &&
+            Array.isArray(userBlogsResponse.data)
+          ) {
+            setMyBlogs(userBlogsResponse.data);
+          }
+        } catch (error) {
+          console.error("Failed to load user blogs:", error);
+          // Don't show error for user blogs, just log it
         }
       }
-    } catch {
+    } catch (error) {
       toast({
         title: "Error loading blogs",
         description: "Failed to load blog posts",
@@ -75,7 +84,7 @@ export default function Blogs() {
         await api.likeBlog(blogId);
       }
       loadBlogs();
-    } catch {
+    } catch (error) {
       toast({
         title: "Action failed",
         description: "Failed to update blog like status",
@@ -92,7 +101,7 @@ export default function Blogs() {
         description: "Your blog post has been deleted successfully",
       });
       loadBlogs();
-    } catch {
+    } catch (error) {
       toast({
         title: "Delete failed",
         description: "Failed to delete blog post",
@@ -116,23 +125,26 @@ export default function Blogs() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="space-y-6">
-          <div className="h-8 bg-muted rounded w-1/4 animate-pulse"></div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="p-6">
-                  <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-muted rounded w-1/2 mb-4"></div>
-                  <div className="h-20 bg-muted rounded mb-4"></div>
-                  <div className="h-3 bg-muted rounded w-1/4"></div>
-                </CardContent>
-              </Card>
-            ))}
+      <>
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="space-y-6">
+            <div className="h-8 bg-muted rounded w-1/4 animate-pulse"></div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="p-6">
+                    <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-muted rounded w-1/2 mb-4"></div>
+                    <div className="h-20 bg-muted rounded mb-4"></div>
+                    <div className="h-3 bg-muted rounded w-1/4"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 

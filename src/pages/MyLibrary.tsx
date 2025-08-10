@@ -11,6 +11,7 @@ import { UserBookResponseDTO, READING_STATUS, READING_STATUS_LABELS } from "@/ty
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { ProgressTracker } from "@/components/layout/ProgressTracker";
+import { Header } from "@/components/layout/Header";
 
 export default function MyLibrary() {
   const { user } = useAuth();
@@ -168,6 +169,12 @@ export default function MyLibrary() {
   }
 
   return (
+    <>
+    <Header
+            user={user}
+            onSearch={handleSearch}
+            onSignOut={logout}
+          />
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* Header */}
       <div className="text-center space-y-2">
@@ -284,6 +291,7 @@ export default function MyLibrary() {
         </Card>
       )}
     </div>
+    </>
   );
 }
 
